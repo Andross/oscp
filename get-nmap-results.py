@@ -16,6 +16,7 @@ def findResults(fileName):
             if(re.match('Nmap scan report for [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}', line) and matchFound == False):
                 nmapResults.append(line)
                 matchFound = True
+                
                 #print(matchFound)
             elif(re.match('Nmap scan report for [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}', line) and matchFound == True):
                 #print('here')
@@ -36,6 +37,8 @@ def writeResults(f, nmapResults):
             break
     if pipeFound == True:    
         for line in nmapResults:
+            if(re.match('Nmap scan report for [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}', line)):
+                print(line.split(' ')[4].strip('\n'))
             f.write(line)
 
 if(len(sys.argv) < 2):
