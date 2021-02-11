@@ -38,7 +38,7 @@ def writeResults(f, nmapResults):
     if pipeFound == True:    
         for line in nmapResults:
             if(re.match('Nmap scan report for [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}', line)):
-                print(line.split(' ')[4].strip('\n'))
+                print('{0}{1}'.format(line.split(' ')[4].strip('\n'),' '),end='')
             f.write(line)
 
 if(len(sys.argv) < 2):
