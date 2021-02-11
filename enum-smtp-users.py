@@ -28,3 +28,4 @@ def enum_users(userFile, ipFile):
                 print(result)
             s.close()
             
+enum_users(sys.argv[1],sys.argv[2])
