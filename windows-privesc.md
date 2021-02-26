@@ -302,3 +302,17 @@ Or Powershell:
 * Once you find an interesting process, use exploit-db (or google, or github) to find relevant exploits
 
 ## Token Impersonation
+* Service accounts are usually local accounts on a specific system and are used to run a specific service. These accounts cannot be logged into directly.
+* Multiple problems have been found with service accounts, making them suitable for privilege escalation.
+
+### RottenPotato
+* Service accounts could intercept a SYSTEM ticket and use it to impersonate the SYSTEM user.
+* This was possible because service accounts often have the *SeImpersonatePrivilege" privilege enabled.
+* Any user with *SeImperonatePrivilege* privilege can run the exploits below.
+
+### JuicyPotato
+* RottenPotato was quite limited exploit.
+* JuicyPotato works in the same way as RottenPotato but the authors found many more ways to exploit it. [JuicyPotato GitHub](https://github.com/ohpe/juicy-potato)
+* How to get a shell with a service account? 
+** For example if IIS runs with a service account and you can upload an asp shell you would have a reverse shell with that service account
+** Or if you have SQL injection on MSSQL with xp_cmdshell enabled you can get a shell that way with the MSSQL service account
