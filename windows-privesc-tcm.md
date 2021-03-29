@@ -65,3 +65,19 @@ net firewall show config
 | Seatbelt.exe  | PowerUp.ps1 | Exploit Suggester (Metasploit) |
 | Watson.exe | jaws-enum.ps1 | |
 |SharpUp.exe | | |
+
+**Exploit Suggester**
+run post/multi/recon/local_exploit_suggester
+
+**Windows Linux Subsystem**
+Can be used to escalate privileges
+
+## Token Impersonation
+
+What are tokens?
+Tokens are temp keys taht allow you access to a system/network without having to provide creds each time.
+
+Two types:
+* Delegate - Create for logging into a machine or using Remote Desktop
+* Impersonate - "non-interactive" such as attaching a network drive or domain logon script
+
