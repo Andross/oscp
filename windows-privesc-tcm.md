@@ -2,76 +2,76 @@
 
 ## System Enumeration
 
-systeminfo | findstr /B /C:"OS Name" /C:"OS Version" /C:"System Type" 
+`systeminfo | findstr /B /C:"OS Name" /C:"OS Version" /C:"System Type"` 
 
 **Pull up patches**
 
-wmic qfe
+`wmic qfe`
 
 wmic qfe get Caption,Description,HotFixID,InstalledOn
 
 **List all drives**
 
-wmic logicaldisk
+`wmic logicaldisk`
 
 wmic logicaldisk get Caption,description,providername
 
 ## User E numeration
 
-whoami 
+`whoami` 
 
 **Find user privileges**
 
-whoami /priv
+`whoami /priv`
 
 **Groups you belong to**
 
-whoami /groups
+`whoami /groups`
 
 **Find users on this machine**
 
-net user
+`net user`
 
 **See who is part of a group**
 
-net localgroup administrators
+`net localgroup administrators`
 
 ## Network Enumeration
 
-ipconfig && ipconfig /all
+`ipconfig && ipconfig /all`
 
 **Drop arp table**
 
-arp -a
+`arp -a`
 
 **Read routing table**
 
-route print
+`route print`
 
 **See ports**
 
-netstat -nao
+`netstat -nao`
 
 ## Password Hunting
 
 **Search current directory**
 
-findstr /si password *.txt *.ini *.config
+`findstr /si password *.txt *.ini *.config`
 
 ## A/V and Firewall Enumeration
 
 **Check windows defender**
 
-sc query windefend
+`sc query windefend`
 
 **Look for A/V**
-sc queryex type= service
+`sc queryex type= service`
 
 **Check firewall state**
-netsh advfirewall dump
+`netsh advfirewall dump`
 
 **Check firewall rules**
-net firewall show config
+`net firewall show config`
 
 ## Automated Enumeration Tools
 | Exectuables   | PowerShell    | Other | 
@@ -82,7 +82,7 @@ net firewall show config
 |SharpUp.exe | | |
 
 **Exploit Suggester**
-run post/multi/recon/local_exploit_suggester
+`run post/multi/recon/local_exploit_suggester`
 
 **Windows Linux Subsystem**
 Can be used to escalate privileges
