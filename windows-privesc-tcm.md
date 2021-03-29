@@ -60,7 +60,7 @@ net firewall show config
 
 ## Automated Enumeration Tools
 | Exectuables | PowerShell | Other | 
-| ------------ | ------------- | 
+| ------------- | ------------- | 
 | winPEAS.exe | Sherlock.ps1 | windows-exploit-suggest.py |
 | Seatbelt.exe | PowerUp.ps1 | Exploit Suggester (Metasploit) |
 | Watson.exe | jaws-enum.ps1 | |
