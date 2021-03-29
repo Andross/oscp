@@ -65,12 +65,15 @@ wmic logicaldisk get Caption,description,providername
 `sc query windefend`
 
 **Look for A/V**
+
 `sc queryex type= service`
 
 **Check firewall state**
+
 `netsh advfirewall dump`
 
 **Check firewall rules**
+
 `net firewall show config`
 
 ## Automated Enumeration Tools
